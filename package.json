@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "description": "A package to test scripts publishing packages from a github release workflow",
   "main": "src/index.js",
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -15,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/andrewiggins/publish-gh-release-package/issues"
   },
-  "homepage": "https://github.com/andrewiggins/publish-gh-release-package#readme"
+  "homepage": "https://github.com/andrewiggins/publish-gh-release-package#readme",
+  "devDependencies": {
+    "typescript": "^4.5.3"
+  }
 }
