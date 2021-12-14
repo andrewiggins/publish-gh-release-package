@@ -47,10 +47,7 @@ async function upload({ require, github, context, glob, release }) {
     }
   }
 
-  console.log(
-    `No asset with name ${assetName} found. Creating & uploading new one.`
-  );
-  console.log(`Uploading ${assetName} at ${assetPath}...`);
+  console.log(`Uploading ${assetName} from ${assetPath}...`);
 
   // Upload a release asset
   // API Documentation: https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
