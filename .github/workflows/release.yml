@@ -20,12 +20,12 @@ jobs:
         with:
           # https://github.com/actions/github-script#run-a-separate-file-with-an-async-function
           script: |
-            const script = require('./scripts/release/create.js')
+            const script = require('./scripts/release/create.cjs')
             await script({ github, context, core })
 
       - name: Upload release artifact
         uses: actions/github-script@v5
         with:
           script: |
-            const script = require('./scripts/release/upload.js')
+            const script = require('./scripts/release/upload.cjs')
             await script({ github, context, core })
