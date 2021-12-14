@@ -22,7 +22,7 @@ async function upload({ require, github, context, glob, release }) {
   });
 
   const results = await globber.glob();
-  if (results.length < 0) {
+  if (results.length == 0) {
     throw new Error(
       `No release artifact found matching pattern: ${artifactPattern}`
     );
