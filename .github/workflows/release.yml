@@ -1,0 +1,17 @@
+name: Release
+on: create
+
+jobs:
+  prereq:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo $GITHUB_REF
+
+  build:
+    uses: andrewiggins/publish-gh-release-package/.github/workflows/main.yml@main
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo Hello World!
