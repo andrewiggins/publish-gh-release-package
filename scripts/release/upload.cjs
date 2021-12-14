@@ -32,8 +32,8 @@ async function upload({ require, github, context, glob, release }) {
     );
   }
 
-  const assetName = results[0];
-  const assetPath = path.join(process.cwd(), assetName);
+  const assetPath = results[0];
+  const assetName = path.basename(assetPath);
 
   for (let asset of release.assets) {
     if (artifactRegex.test(asset.name)) {
