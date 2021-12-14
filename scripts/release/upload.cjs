@@ -1,4 +1,7 @@
 module.exports = ({ github, context, core }) => {
+  // // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/v18#repos-upload-release-asset for more information
+  // const headers = { 'content-type': assetContentType, 'content-length': contentLength(assetPath) };
+  //
   // // Upload a release asset
   // // API Documentation: https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
   // // Octokit Documentation: https://octokit.github.io/rest.js/v18#repos-upload-release-asset
