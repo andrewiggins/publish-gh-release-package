@@ -3,7 +3,7 @@ on: create
 
 jobs:
   build:
-    if: startsWith('$GITHUB_REF', 'refs/tags/')
+    if: github.ref_type == 'tag'
     uses: andrewiggins/publish-gh-release-package/.github/workflows/main.yml@main
 
   release:
