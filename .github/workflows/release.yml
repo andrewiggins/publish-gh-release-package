@@ -16,16 +16,16 @@ jobs:
           name: npm-package
       - run: ls -al
       - name: Create draft release
+        id: create-release
         uses: actions/github-script@v5
         with:
           # https://github.com/actions/github-script#run-a-separate-file-with-an-async-function
           script: |
             const script = require('./scripts/release/create.cjs')
-            await script({ github, context, core })
-
+            await script({ github, context })
       - name: Upload release artifact
         uses: actions/github-script@v5
         with:
           script: |
             const script = require('./scripts/release/upload.cjs')
-            await script({ github, context, core })
+            await script({ require, github, context, glob, ${{ steps.create-release.outputs.result }} })

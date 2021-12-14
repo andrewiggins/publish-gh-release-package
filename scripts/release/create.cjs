@@ -1,13 +1,14 @@
 /**
+ * @typedef {import('@octokit/openapi-types').components["schemas"]["release"]} Release
+ *
  * @typedef Params
  * @property {ReturnType<typeof import("@actions/github").getOctokit>} github
  * @property {typeof import("@actions/github").context} context
- * @property {any} core
  *
  * @param {Params} params
- * @returns
+ * @returns {Promise<Release>}
  */
-async function create({ github, context, core }) {
+async function create({ github, context }) {
   const commitSha = process.env.GITHUB_SHA;
   const tag_name = process.env.GITHUB_REF_NAME;
   console.log("tag:", tag_name);
@@ -22,13 +23,8 @@ async function create({ github, context, core }) {
   for await (const page of releasePages) {
     for (let release of page.data) {
       if (release.tag_name == tag_name) {
-        releaseResult = {
-          id: release.id,
-          html_url: release.html_url,
-          upload_url: release.upload_url,
-        };
-
-        console.log("Existing release found:", releaseResult);
+        console.log("Existing release found:", release);
+        releaseResult = release;
         break;
       }
     }
@@ -50,13 +46,8 @@ async function create({ github, context, core }) {
       target_commitish: commitSha,
     });
 
-    releaseResult = {
-      id: createReleaseRes.data.id,
-      html_url: createReleaseRes.data.html_url,
-      upload_url: createReleaseRes.data.upload_url,
-    };
-
-    console.log("Created release:", releaseResult);
+    console.log("Created release:", createReleaseRes.data);
+    releaseResult = createReleaseRes.data;
   }
 
   return releaseResult;

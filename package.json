@@ -24,6 +24,7 @@
   "homepage": "https://github.com/andrewiggins/publish-gh-release-package#readme",
   "devDependencies": {
     "@actions/github": "^5.0.0",
+    "@actions/glob": "^0.2.0",
     "typescript": "^4.5.3",
     "uvu": "^0.5.2"
   }
