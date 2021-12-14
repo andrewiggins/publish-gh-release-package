@@ -30,11 +30,3 @@ jobs:
           name: npm-package
           path: publish-gh-release-package-*.tgz
 
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - run: echo $GITHUB_REF_TYPE
-      - uses: actions/github-script@v5
-        with:
-          script: console.log(context)
