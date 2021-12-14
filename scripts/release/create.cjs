@@ -1,28 +1,40 @@
-module.exports = async ({ github, context, core }) => {
+/**
+ * @typedef Params
+ * @property {ReturnType<typeof import("@actions/github").getOctokit>} github
+ * @property {typeof import("@actions/github").context} context
+ * @property {any} core
+ *
+ * @param {Params} params
+ * @returns
+ */
+async function create({ github, context, core }) {
   const commitSha = process.env.GITHUB_SHA;
   const tag_name = process.env.GITHUB_REF_NAME;
   console.log("tag:", tag_name);
 
-  let id, html_url, upload_url;
+  let releaseResult;
 
-  try {
-    // Get a release by tag name
-    // https://docs.github.com/en/rest/reference/repos#get-a-release-by-tag-name
-    const getRes = await github.rest.repos.getReleaseByTag({
-      ...context.repo,
-      tag: tag_name,
-    });
+  let releasePages = github.paginate.iterator(
+    github.rest.repos.listReleases,
+    context.repo
+  );
 
-    ({
-      data: { id, html_url, upload_url },
-    } = getRes);
+  for await (const page of releasePages) {
+    for (let release of page.data) {
+      if (release.tag_name == tag_name) {
+        releaseResult = {
+          id: release.id,
+          html_url: release.html_url,
+          upload_url: release.upload_url,
+        };
 
-    console.log("Existing release found:", { id, html_url, upload_url });
-  } catch (error) {
-    if (error.status !== 404) {
-      throw error;
+        console.log("Existing release found:", releaseResult);
+        break;
+      }
     }
+  }
 
+  if (!releaseResult) {
     console.log("No existing release found. Creating a new draft...");
 
     // No existing release for this tag found so let's create a release
@@ -38,13 +50,16 @@ module.exports = async ({ github, context, core }) => {
       target_commitish: commitSha,
     });
 
-    // Get the ID, html_url, and upload URL for the created Release from the response
-    ({
-      data: { id, html_url, upload_url },
-    } = createReleaseRes);
+    releaseResult = {
+      id: createReleaseRes.data.id,
+      html_url: createReleaseRes.data.html_url,
+      upload_url: createReleaseRes.data.upload_url,
+    };
 
-    console.log("Created release:", { id, html_url, upload_url });
+    console.log("Created release:", releaseResult);
   }
 
-  return { id, html_url, upload_url };
-};
+  return releaseResult;
+}
+
+module.exports = create;
