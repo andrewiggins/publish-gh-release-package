@@ -15,7 +15,6 @@ async function upload({ require, github, context, glob, release }) {
 	const path = require("path");
 
 	// Find artifact to upload
-	const artifactRegex = /^publish-gh-release-package-.+\.tgz$/;
 	const artifactPattern = "publish-gh-release-package-*.tgz";
 	const globber = await glob.create(artifactPattern, {
 		matchDirectories: false,
@@ -33,10 +32,11 @@ async function upload({ require, github, context, glob, release }) {
 	}
 
 	const assetPath = results[0];
-	const assetName = path.basename(assetPath);
+	const assetName = `publish-gh-release-package-${release.tag_name.replace(/^v/, "")}.tgz`;
+	const assetRegex = /^publish-gh-release-package-.+\.tgz$/;
 
 	for (let asset of release.assets) {
-		if (artifactRegex.test(asset.name)) {
+		if (assetRegex.test(asset.name)) {
 			console.log(
 				`Found existing asset matching asset pattern: ${asset.name}. Removing...`
 			);

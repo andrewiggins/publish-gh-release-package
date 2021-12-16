@@ -1,3 +1,4 @@
+import { execFileSync } from "child_process";
 import fs from "fs";
 import { fetch, stream } from "undici";
 import sade from "sade";
@@ -5,9 +6,14 @@ import sade from "sade";
 let DEBUG = false;
 const log = {
 	debug: (...msgs) => DEBUG && console.log(...msgs),
+	info: (...msgs) => console.log(...msgs),
+	error: (...msgs) => console.error(...msgs),
 };
 
 /**
+ * Parse HTTP Link headers into an array of [rel_name, uri] tuples.
+ * This implementation only looks for one parameter named "rel".
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
  * @param {string} linkHeader
  * @returns {Array<[string, string]>}
  */
@@ -18,9 +24,8 @@ function parseLinkHeader(linkHeader) {
 	const result = [];
 	const uris = linkHeader.split(/,\s*</);
 
-	// Link header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Link
-	// We assume each link uri only has one param and the param key is "rel"
 	for (let uri of uris) {
+		// We assume each link uri only has one param and the param key is "rel"
 		// The first "<" may get stripped off by the split call above
 		const match = uri.match(/<?([^>]*)>\s*;\s*rel="?([^"]*)"?/);
 
@@ -33,12 +38,12 @@ function parseLinkHeader(linkHeader) {
 }
 
 /**
+ * AsyncGenerator for all GitHub releases in this repo, yielding each page of results
  * @typedef {import('@octokit/openapi-types').components["schemas"]["release"]} Release
  * @returns {AsyncGenerator<Release[]>}
  */
 async function* getReleases() {
-	let nextUrl =
-		"https://api.github.com/repos/andrewiggins/publish-gh-release-package/releases";
+	let nextUrl = "https://api.github.com/repos/andrewiggins/publish-gh-release-package/releases";
 	while (nextUrl) {
 		log.debug("Fetching", nextUrl);
 
@@ -54,6 +59,9 @@ async function* getReleases() {
 async function main(tag, opts) {
 	DEBUG = opts.debug;
 
+	log.debug("Git tag:", tag);
+	log.debug("Options:", opts);
+
 	// 1. Find a release with the matching tag
 	/** @type {Release} */
 	let release;
@@ -67,15 +75,15 @@ async function main(tag, opts) {
 
 	log.debug("Release:", release);
 	if (release) {
-		console.log("Found release", release.id, "at", release.html_url);
+		log.info("Found release", release.id, "at", release.html_url);
 	} else {
-		console.error(
-			`Could not find a release with the tag ${tag}. Please publish that tag first, then run this script.`
+		log.error(
+			`Could not find a release with the tag ${tag}. Please publish that tag, wait for the release workflow to complete. Then publish the release, and re-run this script.`
 		);
 		process.exit(1);
 	}
 
-	// 2. Download npm package from release
+	// 2. Find npm package release asset
 	/** @type {Release["assets"][0]} */
 	let packageAsset = null;
 	const artifactRegex = /^publish-gh-release-package-.+\.tgz$/;
@@ -86,21 +94,9 @@ async function main(tag, opts) {
 	}
 
 	if (packageAsset) {
-		console.log(
-			`Found npm package asset: ${packageAsset.name}`,
-			`\nDownloading ${packageAsset.name}...`
-		);
-
-		await stream(
-			"https://github.com/andrewiggins/publish-gh-release-package/releases/download/v0.0.1-test/publish-gh-release-package-0.0.1.tgz",
-			{
-				method: "GET",
-				maxRedirections: 30,
-			},
-			() => fs.createWriteStream("publish-gh-release-package-0.0.1.tgz")
-		);
+		log.info(`Found npm package asset: ${packageAsset.name}`);
 	} else {
-		console.error(
+		log.error(
 			"Could not find asset matching package regex:",
 			artifactRegex,
 			"\nPlease wait for release workflow to complete and upload npm package."
@@ -108,12 +104,39 @@ async function main(tag, opts) {
 		process.exit(1);
 	}
 
+	// 3. Download release asset
+	log.info(`\nDownloading ${packageAsset.name}...`);
+	await stream(
+		packageAsset.browser_download_url,
+		{
+			method: "GET",
+			maxRedirections: 30,
+		},
+		() => fs.createWriteStream(packageAsset.name)
+	);
+
 	// 3. Run npm publish
-	// TODO: For now, manually run npm publish on package
+	const args = ["publish", packageAsset.name];
+	if (opts["npm-tag"]) {
+		args.push("--tag", opts["npm-tag"]);
+	}
+
+	if (opts["dry-run"]) {
+		log.info(`DRY RUN: Would've run the command \`npm ${args.join(" ")}\``);
+	} else {
+		log.debug(`Executing \`npm ${args.join(" ")}\``);
+		// execFileSync("npm", args, { encoding: "utf8", stdio: "inherit" });
+	}
 }
 
-sade("publish <tag>", true)
-	.describe("Publish a tagged version of this package.")
+sade("publish <git-tag>", true)
+	.describe("Publish a tagged version of this package")
+	.option("--npm-tag", "The npm tag to publish this package under", "")
+	.option(
+		"--dry-run",
+		"Prepare the package for publishing but don't actually publish it",
+		false
+	)
 	.option("--debug -d", "Log debugging information", false)
 	.action(main)
 	.parse(process.argv);

@@ -40,7 +40,7 @@ async function create({ github, context }) {
 			...context.repo,
 			tag_name,
 			name: tag_name,
-			body: "",
+			body: "", // TODO: Maybe run changelogged and prefill the body?
 			draft: true,
 			prerelease: tag_name.includes("-"),
 			target_commitish: commitSha,
