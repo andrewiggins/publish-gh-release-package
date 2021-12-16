@@ -11,56 +11,56 @@
  * @param {Params} params
  */
 async function upload({ require, github, context, glob, release }) {
-  const fs = require("fs");
-  const path = require("path");
+	const fs = require("fs");
+	const path = require("path");
 
-  // Find artifact to upload
-  const artifactRegex = /^publish-gh-release-package-.+\.tgz$/;
-  const artifactPattern = "publish-gh-release-package-*.tgz";
-  const globber = await glob.create(artifactPattern, {
-    matchDirectories: false,
-  });
+	// Find artifact to upload
+	const artifactRegex = /^publish-gh-release-package-.+\.tgz$/;
+	const artifactPattern = "publish-gh-release-package-*.tgz";
+	const globber = await glob.create(artifactPattern, {
+		matchDirectories: false,
+	});
 
-  const results = await globber.glob();
-  if (results.length == 0) {
-    throw new Error(
-      `No release artifact found matching pattern: ${artifactPattern}`
-    );
-  } else if (results.length > 1) {
-    throw new Error(
-      `More than one artifact matching pattern found. Expected only one. Found ${results.length}.`
-    );
-  }
+	const results = await globber.glob();
+	if (results.length == 0) {
+		throw new Error(
+			`No release artifact found matching pattern: ${artifactPattern}`
+		);
+	} else if (results.length > 1) {
+		throw new Error(
+			`More than one artifact matching pattern found. Expected only one. Found ${results.length}.`
+		);
+	}
 
-  const assetPath = results[0];
-  const assetName = path.basename(assetPath);
+	const assetPath = results[0];
+	const assetName = path.basename(assetPath);
 
-  for (let asset of release.assets) {
-    if (artifactRegex.test(asset.name)) {
-      console.log(
-        `Found existing asset matching asset pattern: ${asset.name}. Removing...`
-      );
-      await github.rest.repos.deleteReleaseAsset({
-        ...context.repo,
-        asset_id: asset.id,
-      });
-    }
-  }
+	for (let asset of release.assets) {
+		if (artifactRegex.test(asset.name)) {
+			console.log(
+				`Found existing asset matching asset pattern: ${asset.name}. Removing...`
+			);
+			await github.rest.repos.deleteReleaseAsset({
+				...context.repo,
+				asset_id: asset.id,
+			});
+		}
+	}
 
-  console.log(`Uploading ${assetName} from ${assetPath}...`);
+	console.log(`Uploading ${assetName} from ${assetPath}...`);
 
-  // Upload a release asset
-  // API Documentation: https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
-  // Octokit Documentation: https://octokit.github.io/rest.js/v18#repos-upload-release-asset
-  const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
-    ...context.repo,
-    release_id: release.id,
-    name: assetName,
-    data: fs.readFileSync(assetPath),
-  });
+	// Upload a release asset
+	// API Documentation: https://docs.github.com/en/rest/reference/repos#upload-a-release-asset
+	// Octokit Documentation: https://octokit.github.io/rest.js/v18#repos-upload-release-asset
+	const uploadAssetResponse = await github.rest.repos.uploadReleaseAsset({
+		...context.repo,
+		release_id: release.id,
+		name: assetName,
+		data: fs.readFileSync(assetPath),
+	});
 
-  console.log("Asset:", uploadAssetResponse.data);
-  return uploadAssetResponse.data;
+	console.log("Asset:", uploadAssetResponse.data);
+	return uploadAssetResponse.data;
 }
 
 module.exports = upload;
