@@ -12,7 +12,6 @@
  */
 async function upload({ require, github, context, glob, release }) {
 	const fs = require("fs");
-	const path = require("path");
 
 	// Find artifact to upload
 	const artifactPattern = "publish-gh-release-package-*.tgz";

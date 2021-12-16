@@ -43,7 +43,8 @@ function parseLinkHeader(linkHeader) {
  * @returns {AsyncGenerator<Release[]>}
  */
 async function* getReleases() {
-	let nextUrl = "https://api.github.com/repos/andrewiggins/publish-gh-release-package/releases";
+	let nextUrl =
+		"https://api.github.com/repos/andrewiggins/publish-gh-release-package/releases";
 	while (nextUrl) {
 		log.debug("Fetching", nextUrl);
 
@@ -121,10 +122,8 @@ async function main(tag, opts) {
 		args.push("--tag", opts["npm-tag"]);
 	}
 
-	if (opts["dry-run"]) {
-		log.info(`DRY RUN: Would've run the command \`npm ${args.join(" ")}\``);
-	} else {
-		log.debug(`Executing \`npm ${args.join(" ")}\``);
+	log.info(`Executing \`npm ${args.join(" ")}\``);
+	if (!opts["dry-run"]) {
 		// execFileSync("npm", args, { encoding: "utf8", stdio: "inherit" });
 	}
 }

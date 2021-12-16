@@ -48,6 +48,9 @@ async function create({ github, context }) {
 
 		console.log("Created release:", createReleaseRes.data);
 		releaseResult = createReleaseRes.data;
+	} else if (!releaseResult.draft) {
+		console.error("Found existing release but it was not in draft mode");
+		process.exit(1);
 	}
 
 	return releaseResult;
