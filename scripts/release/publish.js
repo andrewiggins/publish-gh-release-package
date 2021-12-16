@@ -124,7 +124,7 @@ async function main(tag, opts) {
 
 	log.info(`Executing \`npm ${args.join(" ")}\``);
 	if (!opts["dry-run"]) {
-		// execFileSync("npm", args, { encoding: "utf8", stdio: "inherit" });
+		execFileSync("npm", args, { encoding: "utf8", stdio: "inherit" });
 	}
 }
 
