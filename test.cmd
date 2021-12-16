@@ -5,7 +5,7 @@ rem Testing branch creation
 @REM git push -u origin test-branch
 
 rem Testing tag creation
-git tag -d v0.0.1-test
-git push --delete origin v0.0.1-test
-git tag v0.0.1-test
+git tag -d v0.0.1-test2
+git push --delete origin v0.0.1-test2
+git tag v0.0.1-test2
 git push --tags

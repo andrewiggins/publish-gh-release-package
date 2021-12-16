@@ -1,7 +1,7 @@
 {
   "name": "publish-gh-release-package",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.1-test2",
   "description": "A package to test scripts publishing packages from a github release workflow",
   "main": "dist/index.js",
   "module": "dist/index.js",
