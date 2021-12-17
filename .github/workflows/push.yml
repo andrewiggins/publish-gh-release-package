@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: 16.x
 
+      - name: Install @changesets/cli
+        run: npm i @changesets/cli
+
       - id: changesets
         uses: changesets/action@v1
         with:
