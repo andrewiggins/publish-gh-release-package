@@ -1,5 +1,11 @@
 # publish-gh-release-package
 
+## 0.2.2
+
+### Patch Changes
+
+- c1912ab: Add more logging to upload release asset
+
 ## 0.2.1
 
 ### Patch Changes
