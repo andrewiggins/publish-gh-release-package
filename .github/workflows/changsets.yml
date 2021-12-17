@@ -22,5 +22,10 @@ jobs:
 
       - name: Create Release Pull Request
         uses: changesets/action@v1
+        with:
+          # We provide a dummy publish script so that changesets will create the
+          # GitHub release and the Git tags for us but not publish the npm
+          # package. We still manually perform the publish using 2FA
+          publish: echo Skip publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
