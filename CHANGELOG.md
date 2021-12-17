@@ -1,5 +1,11 @@
 # publish-gh-release-package
 
+## 0.2.1
+
+### Patch Changes
+
+- 141c043: Fix release script package name
+
 ## 0.2.0
 
 ### Minor Changes
