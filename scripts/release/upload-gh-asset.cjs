@@ -2,21 +2,49 @@
  * @typedef {import('@octokit/openapi-types').components["schemas"]["release"]} Release
  *
  * @typedef Params
- * @property {typeof require} require
+ * @property {typeof require} require GitHub Action Script's special require implementation
  * @property {ReturnType<typeof import("@actions/github").getOctokit>} github
  * @property {typeof import("@actions/github").context} context
  * @property {typeof import("@actions/glob")} glob
- * @property {Release} release
+ * @property {Array<{ name: string; version: string }>} packages
  *
  * @param {Params} params
  */
-async function upload({ require, github, context, glob, release }) {
+async function upload({ require, github, context, glob, packages }) {
 	const fs = require("fs");
+
+	console.log("packages:", packages);
+	if (packages.length > 1) {
+		throw new Error(
+			"This release script does not yet support handling multiple published packages"
+		);
+	}
+
+	const preactPackage = packages.find(pkg => pkg.name == "preact");
+	if (!preactPackage) {
+		throw new Error('Could not find a published package with name "preact".');
+	}
+
+	// Get matching GitHub release
+	const response = await github.rest.repos.getReleaseByTag({
+		...context.repo,
+		tag: `v${preactPackage.version}`
+	});
+
+	if (response.status >= 400) {
+		const data = JSON.stringify(response.data, null, 2);
+		throw new Error(
+			`Github getReleaseByTag did not return success: ${response.status} ${data}`
+		);
+	}
+
+	/** @type {Release} */
+	const release = response.data;
 
 	// Find artifact to upload
 	const artifactPattern = "publish-gh-release-package-*.tgz";
 	const globber = await glob.create(artifactPattern, {
-		matchDirectories: false,
+		matchDirectories: false
 	});
 
 	const results = await globber.glob();
@@ -31,7 +59,10 @@ async function upload({ require, github, context, glob, release }) {
 	}
 
 	const assetPath = results[0];
-	const assetName = `publish-gh-release-package-${release.tag_name.replace(/^v/, "")}.tgz`;
+	const assetName = `publish-gh-release-package-${release.tag_name.replace(
+		/^v/,
+		""
+	)}.tgz`;
 	const assetRegex = /^publish-gh-release-package-.+\.tgz$/;
 
 	for (let asset of release.assets) {
@@ -41,7 +72,7 @@ async function upload({ require, github, context, glob, release }) {
 			);
 			await github.rest.repos.deleteReleaseAsset({
 				...context.repo,
-				asset_id: asset.id,
+				asset_id: asset.id
 			});
 		}
 	}
@@ -55,7 +86,8 @@ async function upload({ require, github, context, glob, release }) {
 		...context.repo,
 		release_id: release.id,
 		name: assetName,
-		data: fs.readFileSync(assetPath),
+		// @ts-ignore
+		data: fs.readFileSync(assetPath)
 	});
 
 	console.log("Asset:", uploadAssetResponse.data);

@@ -25,8 +25,7 @@ jobs:
         with:
           node-version: 16.x
 
-      - name: Changesets - Version or Tag
-        id: changesets
+      - id: changesets
         uses: changesets/action@v1
         with:
           publish: npx @changesets/cli tag
@@ -39,4 +38,4 @@ jobs:
         with:
           script: |
             const script = require('./scripts/release/upload-gh-asset.cjs')
-            return await script({ require, github, context, glob, release: ${{ steps.create-release.outputs.result }} })
+            return await script({ require, github, context, glob, packages: ${{ steps.changesets.outputs.publishedPackages }} })
