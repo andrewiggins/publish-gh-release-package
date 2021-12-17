@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v2
         with:
-          node-version: 16.x
+          node-version: 16
 
       # changsets/action requires @changesets/cli to be installed. Would be nice
       # if we could install just @changesets/cli and not the entire repo's
