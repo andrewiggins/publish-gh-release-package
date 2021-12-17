@@ -34,7 +34,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release artifact
-        if: steps.changesets.outputs.published
+        if: steps.changesets.outputs.published == 'true'
         uses: actions/github-script@v5
         with:
           script: |
