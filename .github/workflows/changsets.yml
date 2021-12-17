@@ -20,7 +20,7 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Create Release Pull Request
+      - name: Changesets
         uses: changesets/action@v1
         with:
           # We provide a dummy publish script so that changesets will create the
