@@ -31,7 +31,7 @@ async function upload({ require, github, context, glob, packages }) {
 
 	// Get matching GitHub release
 	const releaseTag = `v${preactPackage.version}`;
-	console.log(`Looking for release with tag ${releaseTag}`);
+	console.log(`Looking for release with tag ${releaseTag}...`);
 
 	const response = await github.rest.repos.getReleaseByTag({
 		...context.repo,
