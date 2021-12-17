@@ -20,9 +20,13 @@ async function upload({ require, github, context, glob, packages }) {
 		);
 	}
 
-	const preactPackage = packages.find(pkg => pkg.name == "preact");
+	const preactPackage = packages.find(
+		pkg => pkg.name == "publish-gh-release-package"
+	);
 	if (!preactPackage) {
-		throw new Error('Could not find a published package with name "preact".');
+		throw new Error(
+			'Could not find a published package with name "publish-gh-release-package".'
+		);
 	}
 
 	// Get matching GitHub release
