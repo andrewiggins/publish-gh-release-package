@@ -1,2 +1,2 @@
 export const message = "Hello World!";
-export const count = 1;
+export const count = 2;
