@@ -30,9 +30,12 @@ async function upload({ require, github, context, glob, packages }) {
 	}
 
 	// Get matching GitHub release
+	const releaseTag = `v${preactPackage.version}`;
+	console.log(`Looking for release with tag ${releaseTag}`);
+
 	const response = await github.rest.repos.getReleaseByTag({
 		...context.repo,
-		tag: `v${preactPackage.version}`
+		tag: releaseTag
 	});
 
 	if (response.status >= 400) {
@@ -44,6 +47,7 @@ async function upload({ require, github, context, glob, packages }) {
 
 	/** @type {Release} */
 	const release = response.data;
+	console.log("Found release:", release);
 
 	// Find artifact to upload
 	const artifactPattern = "publish-gh-release-package-*.tgz";
